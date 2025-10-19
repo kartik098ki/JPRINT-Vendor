@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Vendor {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String
+  sector      String   // SEC-128, SEC-62, etc.
+  phone       String?
+  address     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  printOrders PrintOrder[]
+  sales       Sale[]
+  activities  OrderActivity[]
+}
+
+model Student {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  phone       String?
+  rollNumber  String?
+  department  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  printOrders PrintOrder[]
+  payments    Payment[]
+}
+
+model PrintOrder {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique
+  studentId   String
+  vendorId    String
+  fileName    String
+  originalFileName String
+  fileSize    Int         // in bytes
+  fileUrl     String?     // URL to download the file
+  pageCount   Int
+  copies      Int
+  colorPrint  Boolean     @default(false)
+  duplex      Boolean     @default(false)
+  paperSize   String      @default("A4")
+  totalPrice  Float
+  status      OrderStatus @default(PENDING)
+  priority    Priority    @default(NORMAL)
+  notes       String?
+  dueDate     DateTime?   // When student needs the print
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  student     Student     @relation(fields: [studentId], references: [id])
+  vendor      Vendor      @relation(fields: [vendorId], references: [id])
+  payment     Payment?
+  activities  OrderActivity[]
+}
+
+model OrderActivity {
+  id          String   @id @default(cuid())
+  orderId     String
+  vendorId    String
+  action      String   // "ACCEPTED", "REJECTED", "PRINTING_STARTED", "COMPLETED", etc.
+  description String?
+  createdAt   DateTime @default(now())
+  
+  order       PrintOrder @relation(fields: [orderId], references: [id])
+  vendor      Vendor    @relation(fields: [vendorId], references: [id])
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  printOrderId  String        @unique
+  studentId     String
+  amount        Float
+  method        PaymentMethod
+  transactionId String?       @unique
+  status        PaymentStatus @default(PENDING)
+  paidAt        DateTime?
+  verifiedBy    String?       // Vendor ID who verified the payment
+  verifiedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  printOrder    PrintOrder    @relation(fields: [printOrderId], references: [id])
+  student       Student       @relation(fields: [studentId], references: [id])
+}
+
+model Sale {
+  id          String   @id @default(cuid())
+  vendorId    String
+  date        DateTime @default(now())
+  totalOrders Int
+  totalRevenue Float
+  status      String   @default("COMPLETED")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  PAYMENT_PENDING
+  ACCEPTED
+  PRINTING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  CARD
+  ONLINE
+  WALLET
+}
+
+enum PaymentStatus {
+  PENDING
+  AWAITING_VERIFICATION
+  COMPLETED
+  FAILED
+  REFUNDED
+}
