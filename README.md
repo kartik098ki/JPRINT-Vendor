@@ -183,10 +183,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📞 Support
 
 For support and questions:
-- Email: support@jprint.com
-- Documentation: [Project Wiki](wiki-link)
+- Email: kartikguleria12@gmail.com
 - Issues: [GitHub Issues](issues-link)
 
 ---
 
-© 2024 JPRINT College Print Service. Built with ❤️ for educational institutions.
+© 2025 JPRINT College Print Service. Built with ❤️ for JIIT.
