@@ -36,7 +36,7 @@ A comprehensive print service management system for college vendors, built with 
 - **Icons**: Lucide React
 - **State Management**: React hooks and server state
 
-## 📋 Database Schema
+## 📋 Database (algorithm)
 
 ### Core Models
 - **Vendor**: Print shop vendors with sector assignments
